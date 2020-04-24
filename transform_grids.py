@@ -138,9 +138,12 @@ def transform_downwards(period, **kwargs):
 
     var_name = 'sfcWind'
     ipath = kwargs['in_path']
-    var_map = {var_name: join(ipath,var_name+"_[0-9][0-9][0-9][0-9].nc4")}
+    var_map = {
+        var_name: join(
+            ipath,
+            var_name + "_day_CCAM-r3355-ACCESS1-0_historical_r1i1p1_[0-9][0-9][0-9][0-9].nc")}
 
-    idb = DBManager(var_map[var_name], var_name="sfcWind")
+    idb = DBManager(var_map[var_name], var_name=var_name)
     variable = idb.variable
     variable.pars['chunksizes'] = (32,32,32)
     variable.dtype = np.dtype('float32')
@@ -215,9 +218,9 @@ if __name__ == '__main__':
     # # smooth(period,**args)
 
     args = dict(
-        in_path='/data/cwd_awra_data/AWRAMSI/IWRM_0042_WP3/GIT/Jack/py3/wind/transform-2m-grids-to-10m/input/',
-        out_path='/data/cwd_awra_data/AWRAMSI/IWRM_0042_WP3/GIT/Jack/py3/wind/transform-2m-grids-to-10m/output/',
-        h5_grids='/data/cwd_awra_data/AWRAMSI/IWRM_0042_WP3/GIT/Stuart/py3/wind/transform-2m-grids-to-10m/davenport-vertical-wind-profile-parameters-0.05-mean.h5'
+        in_path='/data/from_nci_tp28',
+        out_path='./transfrom_grids_output',
+        h5_grids='./davenport-vertical-wind-profile-parameters-0.05-mean.h5'
     )
     period = pd.date_range("1 jan 1960","31 dec 2005", freq='D')
 
