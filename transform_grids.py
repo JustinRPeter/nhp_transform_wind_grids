@@ -52,12 +52,12 @@ def transform_downwards(period, **kwargs):
     opath = kwargs['out_path']
     makedirs(opath,exist_ok=True)
 
-    var_name = 'sfcWind'
+    var_name = 'wswd' #'sfcWind'
     ipath = kwargs['in_path']
     var_map = {
         var_name: join(
             ipath,
-            var_name + "_day_CCAM-r3355-ACCESS1-0_historical_r1i1p1_[0-9][0-9][0-9][0-9].nc")}
+            'wswd_' + ('[0-9]'*4) + '.nc')}
 
     idb = DBManager(var_map[var_name], var_name=var_name)
     variable = idb.variable
@@ -87,8 +87,8 @@ def transform_downwards(period, **kwargs):
 
 if __name__ == '__main__':
     args = dict(
-        in_path='/data/from_nci_tp28',
-        out_path='./transfrom_grids_output',
+        in_path='./prepared_files',
+        out_path='./transform_grids_output',
         h5_grids='./davenport-vertical-wind-profile-parameters-0.05-mean.h5'
     )
     period = pd.date_range("1 jan 1960","31 dec 2005", freq='D')

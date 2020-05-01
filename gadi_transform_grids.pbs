@@ -1,0 +1,21 @@
+#PBS -q express
+#PBS -P er4
+#PBS -N job_transform_winds
+#PBS -l walltime=4:00:00
+#PBS -l ncpus=16
+#PBS -l mem=64gb
+#PBS -l storage=gdata/er4+scratch/er4
+#PBS -l wd
+
+
+# Fail on first error
+set -e
+
+
+echo "Activating Environment"
+source activate_env
+
+echo "Running transform grids script"
+python transform_grids.py
+
+echo "Job completed"

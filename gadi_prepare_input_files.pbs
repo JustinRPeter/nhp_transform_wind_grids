@@ -1,0 +1,41 @@
+#PBS -q express
+#PBS -P er4
+#PBS -N job_prepare_input_files
+#PBS -l walltime=1:00:00
+#PBS -l ncpus=12
+#PBS -l mem=48gb
+#PBS -l storage=gdata/er4+scratch/er4+gdata/tp28
+#PBS -l wd
+
+
+# Fail on first error
+set -e
+
+# Load required modules
+module load cdo/1.7.2
+
+
+base_path=/g/data/tp28/Climate_Hazards/QME/ACCESS1-0_bc/rcp45/wswd
+out_path=./prepared_files
+years=$(seq 1960 2005)
+
+
+mkdir -p ${out_path}
+
+
+for year in ${years}; do
+    daily_files_for_year=${base_path}/${year}/*.nc
+    merged_year_tmp_file=${out_path}/wswd_${year}_merged_tmp.nc
+    output_year_file=${out_path}/wswd_${year}.nc
+
+    cdo -f nc4c -z zip mergetime ${daily_files_for_year} ${merged_year_tmp_file}
+
+    # Set the missing value, otherwise it can't be loaded by transform wind scripts
+    cdo -f nc4c -z zip setmissval,1.e+20 ${merged_year_tmp_file} ${output_year_file}
+
+    # Cleanup
+    rm ${merged_year_tmp_file}
+done
+
+
+echo "Job completed"
