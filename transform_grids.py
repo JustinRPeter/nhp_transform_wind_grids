@@ -3,6 +3,7 @@ import math
 import numpy as np
 from os import makedirs
 from os.path import join
+import argparse
 import pandas as pd
 import scipy.signal
 
@@ -45,39 +46,39 @@ class TransformWind(processors.Processor):
 
 
 @elapsed(logger,success)
-def transform_downwards(period, **kwargs):
+def transform(
+        input_glob_pattern,
+        out_path,
+        h5_grids_file,
+        wind_var_name,
+        period,
+        direction):
 
     extent = get_default_extent()
 
-    opath = kwargs['out_path']
-    makedirs(opath,exist_ok=True)
+    makedirs(out_path, exist_ok=True)
 
-    var_name = 'wswd' #'sfcWind'
-    ipath = kwargs['in_path']
-    var_map = {
-        var_name: join(
-            ipath,
-            'wswd_' + ('[0-9]'*4) + '.nc')}
+    var_map = {wind_var_name:input_glob_pattern}
 
-    idb = DBManager(var_map[var_name], var_name=var_name)
+    idb = DBManager(var_map[wind_var_name], var_name=wind_var_name)
     variable = idb.variable
     variable.pars['chunksizes'] = (32,32,32)
     variable.dtype = np.dtype('float32')
     variable.attrs._FillValue = np.float32(-999.)
     variable.dimensions = ['time','latitude','longitude']
-    odb = DBManager.create_annual_split_from_extent(opath,variable,period,extent)
+    odb = DBManager.create_annual_split_from_extent(out_path, variable, period, extent)
 
-    processor = TransformWind(kwargs['h5_grids'], direction='downward')
+    processor = TransformWind(h5_grids_file, direction=direction)
     processor.handle_period(period)
 
     mgr = TaskManager(processor,extent)
     mgr.num_consumers = 3
     mgr.num_readers = 4
 
-    mgr.ichk_map = {var_name: (366,128,128)}
+    mgr.ichk_map = {wind_var_name: (366,128,128)}
     mgr.ochk_map = {'out': (366,128,128)}
 
-    mgr.setup(var_map,odb)
+    mgr.setup(var_map, odb)
     status = mgr.run()
 
     if not status:
@@ -85,12 +86,46 @@ def transform_downwards(period, **kwargs):
 
 
 
-if __name__ == '__main__':
-    args = dict(
-        in_path='./prepared_files',
-        out_path='./transform_grids_output',
-        h5_grids='./davenport-vertical-wind-profile-parameters-0.05-mean.h5'
-    )
-    period = pd.date_range("1 jan 1960","31 dec 2005", freq='D')
+def handle_arguments():
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        '--input_glob_pattern', '-i', required=True,
+        help='Input file glob pattern')
+    parser.add_argument(
+        '--output_path', '-o', required=True,
+        help='Output path. Folder will be created if it doesn\'t already exist')
+    parser.add_argument(
+        '--h5_grids_file', '-h5', required=True,
+        help='H5 grids file to use')
+    parser.add_argument(
+        '--year_start', '-ys', required=True, type=int,
+        help='Start Year. 1st Jan of start year is assumed')
+    parser.add_argument(
+        '--year_end', '-ye', required=True, type=int,
+        help='End Year. 31st Dec of end year is assumed')
+    parser.add_argument(
+        '--wind_var_name', '-n', required=True,
+        help='Wind variable name')
+    parser.add_argument(
+        '--direction', '-d', required=True,
+        choices=['upward', 'downward'],
+        help='Direction to transform. Upwards = 2m to 10m, Downwards = 10m to 2m')
 
-    transform_downwards(period,**args)
+    args = parser.parse_args()
+    return args
+
+
+
+if __name__ == '__main__':
+    args = handle_arguments()
+    period = pd.date_range(
+        '{:d}-01-01'.format(args.year_start),
+        '{:d}-12-31'.format(args.year_end), freq='D')
+
+    transform(
+        input_glob_pattern = args.input_glob_pattern,
+        out_path = args.output_path,
+        h5_grids_file = args.h5_grids_file,
+        wind_var_name = args.wind_var_name,
+        period = period,
+        direction = args.direction)
