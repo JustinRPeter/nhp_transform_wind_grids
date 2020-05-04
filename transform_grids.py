@@ -45,39 +45,39 @@ class TransformWind(processors.Processor):
 
 
 @elapsed(logger,success)
-def transform_downwards(period, **kwargs):
+def transform(
+        input_glob_pattern,
+        out_path,
+        h5_grids_file,
+        wind_var_name,
+        period,
+        direction):
 
     extent = get_default_extent()
 
-    opath = kwargs['out_path']
-    makedirs(opath,exist_ok=True)
+    makedirs(out_path, exist_ok=True)
 
-    var_name = 'wswd' #'sfcWind'
-    ipath = kwargs['in_path']
-    var_map = {
-        var_name: join(
-            ipath,
-            'wswd_' + ('[0-9]'*4) + '.nc')}
+    var_map = {wind_var_name:input_glob_pattern}
 
-    idb = DBManager(var_map[var_name], var_name=var_name)
+    idb = DBManager(var_map[wind_var_name], var_name=wind_var_name)
     variable = idb.variable
     variable.pars['chunksizes'] = (32,32,32)
     variable.dtype = np.dtype('float32')
     variable.attrs._FillValue = np.float32(-999.)
     variable.dimensions = ['time','latitude','longitude']
-    odb = DBManager.create_annual_split_from_extent(opath,variable,period,extent)
+    odb = DBManager.create_annual_split_from_extent(out_path, variable, period, extent)
 
-    processor = TransformWind(kwargs['h5_grids'], direction='downward')
+    processor = TransformWind(h5_grids_file, direction=direction)
     processor.handle_period(period)
 
     mgr = TaskManager(processor,extent)
     mgr.num_consumers = 3
     mgr.num_readers = 4
 
-    mgr.ichk_map = {var_name: (366,128,128)}
+    mgr.ichk_map = {wind_var_name: (366,128,128)}
     mgr.ochk_map = {'out': (366,128,128)}
 
-    mgr.setup(var_map,odb)
+    mgr.setup(var_map, odb)
     status = mgr.run()
 
     if not status:
@@ -86,11 +86,14 @@ def transform_downwards(period, **kwargs):
 
 
 if __name__ == '__main__':
-    args = dict(
-        in_path='./prepared_files',
-        out_path='./transform_grids_output',
-        h5_grids='./davenport-vertical-wind-profile-parameters-0.05-mean.h5'
-    )
+    in_path='./prepared_files'
+    input_glob_pattern = join(in_path, 'wswd_' + ('[0-9]'*4) + '.nc')
     period = pd.date_range("1 jan 1960","31 dec 2005", freq='D')
 
-    transform_downwards(period,**args)
+    transform(
+        input_glob_pattern = input_glob_pattern,
+        out_path = './transform_grids_output',
+        h5_grids_file = './davenport-vertical-wind-profile-parameters-0.05-mean.h5',
+        wind_var_name = 'wswd',
+        period = period,
+        direction = 'downward'):
