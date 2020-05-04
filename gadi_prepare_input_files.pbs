@@ -16,8 +16,8 @@ module load cdo/1.7.2
 
 
 base_path=/g/data/tp28/Climate_Hazards/QME/ACCESS1-0_bc/rcp45/wswd
-out_path=./prepared_files
-years=$(seq 1960 2005)
+out_path=./prepared_files/QME/ACCESS1-0/historical
+years=$(seq 1960 2017)
 
 
 mkdir -p ${out_path}
