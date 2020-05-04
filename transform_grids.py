@@ -3,6 +3,7 @@ import math
 import numpy as np
 from os import makedirs
 from os.path import join
+import argparse
 import pandas as pd
 import scipy.signal
 
@@ -85,15 +86,46 @@ def transform(
 
 
 
+def handle_arguments():
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        '--input_glob_pattern', '-i', required=True,
+        help='Input file glob pattern')
+    parser.add_argument(
+        '--output_path', '-o', required=True,
+        help='Output path. Folder will be created if it doesn\'t already exist')
+    parser.add_argument(
+        '--h5_grids_file', '-h5', required=True,
+        help='H5 grids file to use')
+    parser.add_argument(
+        '--year_start', '-ys', required=True, type=int,
+        help='Start Year. 1st Jan of start year is assumed')
+    parser.add_argument(
+        '--year_end', '-ye', required=True, type=int,
+        help='End Year. 31st Dec of end year is assumed')
+    parser.add_argument(
+        '--wind_var_name', '-n', required=True,
+        help='Wind variable name')
+    parser.add_argument(
+        '--direction', '-d', required=True,
+        choices=['upward', 'downward'],
+        help='Direction to transform. Upwards = 2m to 10m, Downwards = 10m to 2m')
+
+    args = parser.parse_args()
+    return args
+
+
+
 if __name__ == '__main__':
-    in_path='./prepared_files'
-    input_glob_pattern = join(in_path, 'wswd_' + ('[0-9]'*4) + '.nc')
-    period = pd.date_range("1 jan 1960","31 dec 2005", freq='D')
+    args = handle_arguments()
+    period = pd.date_range(
+        '{:d}-01-01'.format(args.year_start),
+        '{:d}-12-31'.format(args.year_end), freq='D')
 
     transform(
-        input_glob_pattern = input_glob_pattern,
-        out_path = './transform_grids_output',
-        h5_grids_file = './davenport-vertical-wind-profile-parameters-0.05-mean.h5',
-        wind_var_name = 'wswd',
+        input_glob_pattern = args.input_glob_pattern,
+        out_path = args.output_path,
+        h5_grids_file = args.h5_grids_file,
+        wind_var_name = args.wind_var_name,
         period = period,
-        direction = 'downward'):
+        direction = args.direction)
