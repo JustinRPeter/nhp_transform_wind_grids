@@ -24,6 +24,6 @@ year_end=2017
 var_name=wswd
 direction=downward
 
-python transform_grids.py -i ${input_pattern} -o ${output_path} -h5 ${grids_file} -ys ${year_start} -ye ${year_end} -n ${var_name} -d ${direction}
+python transform_grids.py -i "${input_pattern}" -o ${output_path} -h5 ${grids_file} -ys ${year_start} -ye ${year_end} -n ${var_name} -d ${direction}
 
 echo "Job completed"
