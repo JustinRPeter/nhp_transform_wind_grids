@@ -16,7 +16,7 @@ echo "Activating Environment"
 source gadi_activate_env
 
 echo "Running transform grids script"
-input_pattern="prepared_files/QME/ACCESS1-0/historical/wswd_*.nc"
+input_pattern=prepared_files/QME/ACCESS1-0/historical/wswd_*.nc
 output_path=./transformed_downwards/QME/ACCESS1-0/historical
 grids_file=davenport-vertical-wind-profile-parameters-0.05-mean.h5
 year_start=1960
