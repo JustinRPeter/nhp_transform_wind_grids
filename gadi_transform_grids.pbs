@@ -13,7 +13,7 @@ set -e
 
 
 echo "Activating Environment"
-source activate_env
+source gadi_activate_env
 
 echo "Running transform grids script"
 input_pattern="prepared_files/QME/ACCESS1-0/historical/wswd_*.nc"
