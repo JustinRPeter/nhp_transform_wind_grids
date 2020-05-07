@@ -26,15 +26,22 @@ mkdir -p ${out_path}
 for year in ${years}; do
     daily_files_for_year=${base_path}/${year}/*.nc
     merged_year_tmp_file=${out_path}/wswd_${year}_merged_tmp.nc
+    missval_tmp_file=${out_path}/wswd_${year}_missval_tmp.nc
     output_year_file=${out_path}/wswd_${year}.nc
 
+    # Merge daily files into yearly files
     cdo -f nc4c -z zip mergetime ${daily_files_for_year} ${merged_year_tmp_file}
 
+    # Perform some additional processing
     # Set the missing value, otherwise it can't be loaded by transform wind scripts
-    cdo -f nc4c -z zip setmissval,1.e+20 ${merged_year_tmp_file} ${output_year_file}
+    cdo -f nc4c -z zip setmissval,99999.9 ${merged_year_tmp_file} ${missval_tmp_file}
+
+    # Invert latitude
+    cdo -f nc4c -z zip invertlat ${missval_tmp_file} ${output_year_file}
 
     # Cleanup
     rm ${merged_year_tmp_file}
+    rm ${missval_tmp_file}
 done
 
 
