@@ -20,7 +20,10 @@ success = "Finished"
 
 
 class TransformWind(processors.Processor):
-    def __init__(self, h5_file, direction='upward'):
+    DIRECTION_UP = 'upward'
+    DIRECTION_DOWN = 'downward'
+
+    def __init__(self, h5_file, direction):
         h = h5py.File(h5_file,'r')
         self.z0 = h['parameters/z0_masked'][:]
         self.direction = direction
@@ -33,10 +36,10 @@ class TransformWind(processors.Processor):
         z0 = self.z0[slice(*chunk['y']),slice(*chunk['x'])]
         zd = 0.5
 
-        if self.direction == 'upward':
+        if self.direction == TransformWind.DIRECTION_UP:
             ### factor to convert 2m to 10m
             k = np.log((10 - zd)/z0) / np.log((2 - zd)/z0)
-        elif self.direction == 'downward':
+        elif self.direction == TransformWind.DIRECTION_DOWN:
             ### factor to convert 10m to 2m
             k =  np.log((2 - zd)/z0) / np.log((10 - zd)/z0)
 
@@ -65,6 +68,7 @@ def transform(
     variable.pars['chunksizes'] = (32,32,32)
     variable.dtype = np.dtype('float32')
     variable.attrs._FillValue = np.float32(-999.)
+    variable.attrs['wind_transformed'] = '10m to 2m' if direction == TransformWind.DIRECTION_DOWN else '2m to 10m'
     variable.dimensions = ['time','latitude','longitude']
     odb = DBManager.create_annual_split_from_extent(out_path, variable, period, extent)
 
@@ -108,8 +112,8 @@ def handle_arguments():
         help='Wind variable name')
     parser.add_argument(
         '--direction', '-d', required=True,
-        choices=['upward', 'downward'],
-        help='Direction to transform. Upwards = 2m to 10m, Downwards = 10m to 2m')
+        choices=[TransformWind.DIRECTION_UP, TransformWind.DIRECTION_DOWN],
+        help='Direction to transform. upward = 2m to 10m, downward = 10m to 2m')
 
     args = parser.parse_args()
     return args
