@@ -18,12 +18,12 @@ source gadi_activate_env
 echo "Running transform grids script"
 input_pattern=prepared_files/QME/ACCESS1-0/historical/wswd_*.nc
 output_path=./transformed_downwards/QME/ACCESS1-0/historical
-grids_file=davenport-vertical-wind-profile-parameters-0.05-mean.h5
+grid_file=davenport-vertical-wind-profile-parameters-0.05-mean.h5
 year_start=1960
 year_end=2017
 var_name=wswd
 direction=downward
 
-python transform_grids.py -i "${input_pattern}" -o ${output_path} -h5 ${grids_file} -ys ${year_start} -ye ${year_end} -n ${var_name} -d ${direction}
+python transform_grids.py -i "${input_pattern}" -o ${output_path} -g ${grid_file} -ys ${year_start} -ye ${year_end} -n ${var_name} -d ${direction}
 
 echo "Job completed"
