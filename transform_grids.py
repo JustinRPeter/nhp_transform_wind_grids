@@ -113,7 +113,7 @@ def handle_arguments():
     parser.add_argument(
         '--direction', '-d', required=True,
         choices=[TransformWind.DIRECTION_UP, TransformWind.DIRECTION_DOWN],
-        help='Direction to transform. Upwards = 2m to 10m, Downwards = 10m to 2m')
+        help='Direction to transform. upward = 2m to 10m, downward = 10m to 2m')
 
     args = parser.parse_args()
     return args
