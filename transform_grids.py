@@ -65,6 +65,7 @@ def transform(
     variable.pars['chunksizes'] = (32,32,32)
     variable.dtype = np.dtype('float32')
     variable.attrs._FillValue = np.float32(-999.)
+    variable.attrs['wind_transformed'] = '10m to 2m' if direction == 'downward' else '2m to 10m'
     variable.dimensions = ['time','latitude','longitude']
     odb = DBManager.create_annual_split_from_extent(out_path, variable, period, extent)
 
