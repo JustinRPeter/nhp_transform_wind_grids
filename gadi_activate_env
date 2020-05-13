@@ -4,10 +4,10 @@ unset PYTHONPATH
 
 source /g/data/er4/vd5822/miniconda3/bin/activate awra-cms
 
-export AWRAMS_REPO_PATH=/scratch/er4/vd5822/awrams_cm-master
-export CHRONIC_REPO_PATH=/scratch/er4/vd5822/chronic-master
+export AWRAMS_REPO_PATH=/g/data/er4/vd5822/awrams_cm-master
+export CHRONIC_REPO_PATH=/g/data/er4/vd5822/chronic-master
 
-export AWRAMS_BASE_PATH=~/dev/awrams_config
+export AWRAMS_BASE_PATH=/g/data/er4/vd5822/awrams_config
 export AWRAMS_DATA_PATH=/g/data/er4/awracms_data
 
 export PYTHONPATH=$PYTHONPATH:${AWRAMS_REPO_PATH}/packages
