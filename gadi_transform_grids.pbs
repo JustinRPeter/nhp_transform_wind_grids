@@ -1,3 +1,5 @@
+#!/bin/bash
+
 #PBS -q express
 #PBS -P er4
 #PBS -N job_transform_winds
@@ -7,23 +9,44 @@
 #PBS -l storage=gdata/er4+scratch/er4
 #PBS -l wd
 
+# Usage
+# Set the following, then submit the job:
+#  - input_pattern (the files need to cover the year_start/year_end)
+#  - output_path
+#  - year_start
+#  - year_end
+#  - var_name
+#  - direction
+#  - grid_file (this probably shouldn't need to be modified)
+# Also set the pbs job parameters (walltime, storage, etc) as required.
+# This job is designed to be submitted from the direction which contains it.
 
 # Fail on first error
 set -e
 
 
-echo "Activating Environment"
-source gadi_activate_env
-
-echo "Running transform grids script"
-input_pattern=prepared_files/QME/ACCESS1-0/historical/wswd_*.nc
-output_path=./transformed_downwards/QME/ACCESS1-0/historical
+input_pattern=/scratch/er4/${USER}/prepared_files/QME/ACCESS1-0/historical/wswd_*.nc
+output_path=/scratch/er4/${USER}/transformed_downwards/QME/ACCESS1-0/historical
 grid_file=davenport-vertical-wind-profile-parameters-0.05-mean.h5
 year_start=1960
 year_end=2017
 var_name=wswd
 direction=downward
 
+
+echo "Input Pattern: ${input_pattern}"
+echo "Output Path: ${output_path}"
+echo "Grid File: ${grid_file}"
+echo "Start Year: ${year_start}"
+echo "End Year: ${year_end}"
+echo "Var Name: ${var_name}"
+echo "Direction: ${direction}"
+
+
+echo "Activating Environment"
+source gadi_activate_env
+
+echo "Running transform grids script"
 python transform_grids.py -i "${input_pattern}" -o ${output_path} -g ${grid_file} -ys ${year_start} -ye ${year_end} -n ${var_name} -d ${direction}
 
 echo "Job completed"
