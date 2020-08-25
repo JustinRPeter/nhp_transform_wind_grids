@@ -1,0 +1,42 @@
+#!/bin/bash
+
+#PBS -q express
+#PBS -P er4
+#PBS -N job_invert_lat
+#PBS -l walltime=1:00:00
+#PBS -l ncpus=16
+#PBS -l mem=128gb
+#PBS -l storage=gdata/er4+scratch/er4+gdata/eg3
+
+# Usage
+# Use this job to invert latitude of a netcdf file.
+# Set the input_file, output_path, and oupout_file as desired, then submit the job.
+# Although the cdo invertlat command can be run on command line, the
+# purpose of this job is fix the cdo module version, as well as provide some
+# record via the job log.
+# Transform Wind Grid script assumes data is indexed such that the "origin" starts
+# at the top left corner. If data is indexed such that it starts at the bottom right,
+# lats need to be inverted in order to match the assumptions of how Transform Wind Grid works.
+
+
+# Fail on first error
+set -e
+
+# Load required modules
+module load cdo/1.7.2
+
+
+input_file=/g/data/eg3/jp0715/HydroProj/stitch/sfcWind_mrnbc_CNRM-CM5_rcp45.nc4
+output_path=/scratch/er4/${USER}/lat_inverted
+output_file=${output_path}/sfcWind_mrnbc_CNRM-CM5_rcp45.nc4
+
+
+echo "Input File: ${input_file}"
+echo "Output File: ${output_file}"
+
+mkdir -p ${output_path}
+
+echo "Inverting Latitude"
+cdo -f nc4c invertlat ${input_file} ${output_file}
+
+echo "Job Completed"
