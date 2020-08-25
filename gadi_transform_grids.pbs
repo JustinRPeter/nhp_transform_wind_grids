@@ -49,4 +49,4 @@ source gadi_activate_env
 echo "Running transform grids script"
 python transform_grids.py -i "${input_pattern}" -o ${output_path} -g ${grid_file} -ys ${year_start} -ye ${year_end} -n ${var_name} -d ${direction}
 
-echo "Job completed"
+echo "Job Completed"
