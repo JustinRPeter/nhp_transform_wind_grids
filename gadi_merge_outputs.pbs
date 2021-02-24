@@ -1,0 +1,44 @@
+#!/bin/bash
+
+#PBS -q normal
+#PBS -P er4
+#PBS -N job_merge_wind_transform_outputs
+#PBS -l walltime=4:00:00
+#PBS -l ncpus=16
+#PBS -l mem=128gb
+#PBS -l storage=scratch/eg3
+#PBS -l wd
+
+# Usage
+# This job is to merge the outputs of wind transform back into a single file.
+# Originally made for MRNBC.
+# Set the following, then submit the job:
+#  - rcp
+#  - gcm
+#  - input_dir (all the files in this dir will be merged)
+#  - output_path
+#  - output_file
+# Also set the pbs job parameters (walltime, storage, etc) as required.
+# This job is designed to be submitted from the direction which contains it.
+
+# Fail on first error
+set -e
+
+module load cdo/1.7.2
+
+rcp=rcp85
+gcm=ACCESS1-0
+
+input_dir=/scratch/eg3/${USER}/mrnbc_wind_transform/transformed_downwards/${gcm}/${rcp}
+output_path=/scratch/eg3/${USER}/mrnbc_wind_transform/transformed_downwards_merged/${gcm}/${rcp}
+output_file=${output_path}/sfcWind_mrnbc_${gcm}_${rcp}.nc4
+
+echo "Input Dir: ${input_dir}"
+echo "Output Path: ${output_path}"
+
+mkdir -p ${output_path}
+
+echo "Merging files in ${input_dir} to ${output_file}"
+cdo -f nc4c -mergetime ${input_dir}/* ${output_file}
+
+echo "Job Completed"
